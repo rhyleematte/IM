@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Available Schedules{% endblock %}
+{% block header %}Available Schedules{% endblock %}
+
+{% block content %}
+<div class="filter-btns mb-3">
+  <button type="button" class="btn btn-outline-primary active" data-category="All">All</button>
+  <button type="button" class="btn btn-outline-primary" data-category="Personal">Personal</button>
+  <button type="button" class="btn btn-outline-primary" data-category="Business">Business</button>
+</div>
+
+<!-- Personal Schedules Section -->
+<div class="mb-4" id="personal-section">
+  <h3>Personal Schedules</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="personal-schedules">
+      {% for schedule in schedules %}
+        {% if schedule.group == 'personal' %}
+        <tr>
+          <td>{{ schedule.title }}</td>
+          <td>
+            {{ schedule.description|truncatechars:20 }}
+            {% if schedule.description|length > 100 %}
+              <a href="#" class="view-full-description" data-description="{{ schedule.description|escape }}">View more</a>
+            {% endif %}
+          </td>
+          <td>{{ schedule.get_group_display }}</td>
+          <td>{{ schedule.date }}</td>
+          <td>{{ schedule.time }}</td>
+          <td>
+            <a href="{% url 'edit_schedule' schedule.id %}" class="btn btn-sm btn-success me-1">Edit</a>
+            <form method="POST" action="{% url 'delete_schedule' schedule.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this schedule?');">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endif %}
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">No personal schedules available.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Business Schedules Section -->
+<div class="mb-4" id="business-section">
+  <h3>Business Schedules</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="business-schedules">
+      {% for schedule in schedules %}
+        {% if schedule.group == 'business' %}
+        <tr>
+          <td>{{ schedule.title }}</td>
+          <td>
+            {{ schedule.description|truncatechars:100 }}
+            {% if schedule.description|length > 100 %}
+              <a href="#" class="view-full-description" data-description="{{ schedule.description|escape }}">View more</a>
+            {% endif %}
+          </td>
+          <td>{{ schedule.get_group_display }}</td>
+          <td>{{ schedule.date }}</td>
+          <td>{{ schedule.time }}</td>
+          <td>
+            <a href="{% url 'edit_schedule' schedule.id %}" class="btn btn-sm btn-success me-1">Edit</a>
+            <form method="POST" action="{% url 'delete_schedule' schedule.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this schedule?');">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endif %}
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">No business schedules available.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Full Description Modal -->
+<div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="descriptionModalLabel">Full Description</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Full description will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.filter-btns button');
+    const personalSection = document.getElementById('personal-section');
+    const businessSection = document.getElementById('business-section');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (category === 'All') {
+          personalSection.style.display = '';
+          businessSection.style.display = '';
+        } else if (category === 'Personal') {
+          personalSection.style.display = '';
+          businessSection.style.display = 'none';
+        } else if (category === 'Business') {
+          personalSection.style.display = 'none';
+          businessSection.style.display = '';
+        }
+      });
+    });
+
+    // Handle "View more" clicks
+    const viewLinks = document.querySelectorAll('.view-full-description');
+    viewLinks.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const fullDescription = this.getAttribute('data-description');
+        const modalBody = document.querySelector('#descriptionModal .modal-body');
+        modalBody.textContent = fullDescription;
+        const descriptionModal = new bootstrap.Modal(document.getElementById('descriptionModal'));
+        descriptionModal.show();
+      });
+    });
+  });
+</script>
+{% endblock %}
