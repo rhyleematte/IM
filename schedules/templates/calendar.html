@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar View{% endblock %}
+
+{% block extra_head %}
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <style>
+.fc {
+    background-color: #fef9f6;
+    border: 1px solid #ecdcd2;
+    color: #5c3a2f; /* soft brown text color */
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* Header (month/year, prev/next) */
+  .fc-toolbar-title {
+    color: #5c3a2f;
+    font-weight: bold;
+  }
+
+  .fc-button {
+    background-color: #f3d6c6;
+    border: none;
+    color: #5c3a2f;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+
+  .fc-button:hover {
+    background-color: #e4c2b3;
+  }
+
+  /* Day number in each cell */
+  .fc-daygrid-day-number {
+    color: #5c3a2f;
+    font-weight: bold;
+  }
+
+  /* Events inside the calendar */
+  .fc-event {
+    background-color: #c08081;
+    border: none;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.85em;
+  }
+
+  .fc-event:hover {
+    background-color: #a56f67;
+  }
+
+  /* Highlight current day */
+  .fc-day-today {
+    background-color: #fdece6;
+  }
+
+  /* Event details container (already styled but reinforcing) */
+  .event-details {
+    background-color: #fef9f6;
+    border: 1px solid #ecdcd2;
+    color: #5c3a2f;
+  }
+
+  .event-item {
+    background-color: #ffffff;
+    border: 1px solid #f3d6c6;
+  }
+
+
+    #calendar {
+      max-width: 50%;
+      margin: 0 auto;
+    }
+
+    .event-details {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      background-color: #f8f9fa;
+      display: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-details h3 {
+      margin-top: 0;
+      font-size: 1.5em;
+      color: #868b91;
+    }
+
+    .event-details .event-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .fc-daygrid-day-number {
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+
+    @media (max-width: 768px) {
+      .event-details {
+        padding: 15px;
+      }
+
+      .event-details h3 {
+        font-size: 1.3em;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div id="calendar"></div>
+
+  <div class="event-details" id="event-details">
+    <h3>Event Details</h3>
+    <div id="event-list"></div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        themeSystem: 'bootstrap5',
+        events: '/calendar/events/',
+
+        // THIS IS WHERE YOU PUT THE CODE ↓↓↓↓↓↓
+        dateClick: function(info) {
+          var clickedDate = info.dateStr;
+
+          fetch(`/calendar/events/?date=${clickedDate}`)
+            .then(response => response.json())
+            .then(events => {
+              var eventDetailsContainer = document.getElementById('event-list');
+              var eventDetails = document.getElementById('event-details');
+              eventDetailsContainer.innerHTML = '';
+
+              if (!Array.isArray(events) || events.length === 0) {
+                eventDetailsContainer.innerHTML = '<p>No Schedule Available for this date</p>';
+              } else {
+                events.forEach(event => {
+                  var eventItem = document.createElement('div');
+                  eventItem.classList.add('event-item');
+                  eventItem.innerHTML = `
+                    <strong>Title:</strong> ${event.title || 'No title available'}<br>
+                    <strong>Description:</strong> ${event.description || 'No description available'}<br>
+                    <strong>Category:</strong> ${event.category || 'No category available'}<br>
+                    <strong>Date:</strong> ${event.start_date || 'No date available'}<br>
+                    <strong>Time:</strong> ${event.time || 'No time available'}<br>
+                  `;
+                  eventDetailsContainer.appendChild(eventItem);
+                });
+              }
+
+              eventDetails.style.display = 'block';
+            })
+            .catch(error => {
+              console.error('Error fetching events:', error);
+            });
+        },
+
+        windowResize: function(view) {
+          calendar.refetchEvents();
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+{% endblock %}

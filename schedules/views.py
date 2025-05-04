@@ -3,7 +3,7 @@ from .models import Schedule
 from .forms import ScheduleForm
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
-
+from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Schedule
 
@@ -49,3 +49,28 @@ def delete_schedule(request, pk):
         schedule.delete()
         return redirect('schedule_list')
     return render(request, 'schedule_confirm_delete.html', {'schedule': schedule})
+
+
+    
+def calendar_view(request):
+    return render(request, 'calendar.html')
+
+
+
+def event_list(request):
+    date = request.GET.get('date')  # e.g., 2025-05-05
+
+    # Directly filter by DateField
+    schedules = Schedule.objects.filter(date=date)
+
+    data = []
+    for schedule in schedules:
+        data.append({
+            'title': schedule.title,
+            'description': schedule.description,
+            'category': schedule.group,
+            'start_date': schedule.date.strftime('%Y-%m-%d'),
+            'time': schedule.time.strftime('%I:%M %p')  # format time nicely like "03:30 PM"
+        })
+
+    return JsonResponse(data, safe=False)

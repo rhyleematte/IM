@@ -7,25 +7,90 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body { padding: 2rem; }
-    .filter-btns .btn { margin-right: 0.5rem; }
+
+    .btn-custom {
+    background-color: #C08081; /* Custom background color */
+    color: white; /* Text color */
+    border: none; /* Remove border */
+    padding: 0.5rem 1rem; /* Add padding for size */
+    margin-right: 0.5rem; /* Space between buttons */
+    text-transform: uppercase; /* Uppercase text */
+    font-weight: 600; /* Bold text */
+    border-radius: 0.25rem; /* Slightly rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition */
+  }
+
+  .btn-custom:hover {
+    background-color: #a56f67; /* Darker shade on hover */
+  }
+
+  .btn-custom:focus {
+    outline: none; /* Remove the outline when the button is focused */
+  }
+
+    body {
+      padding: 2rem;
+      background-color: #f9f0e7;
+    }
+
+    .filter-btns .btn {
+      margin-right: 0.5rem;
+    }
+
+    /* Header (navbar) styling with nude background */
+    .navbar {
+      background-color: #f2e0d6; /* Nude background */
+      border-bottom: 2px solid #dee2e6;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 1rem 1.5rem;
+    }
+
+    .navbar h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #343a40;
+    }
+
+    .navbar .btn {
+      background-color: #312c2c; /* Color for buttons */
+      color: white;
+    }
+
+    .navbar .btn:hover {
+      background-color: #a76c6d; /* Darker shade on hover */
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Remove margin from navbar to make it full width */
+    .navbar-expand-lg {
+      width: 100%;
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-      <!-- Left-aligned links -->
-      <div>
-        <a href="{% url 'schedule_list' %}" class="btn btn-primary me-2">Home</a>
-        <a href="{% url 'add_schedule' %}" class="btn btn-success">Add Schedule</a>
-      </div>
-      <!-- Centered title -->
-      <div class="mx-auto">
-        <h1 class="mb-0">Available Schedules</h1>
-      </div>
+<nav style="margin: 1rem 0;">
+  <div class="container d-flex justify-content-between align-items-center">
+    <!-- Left-aligned title -->
+    <div>
+      <h1 class="mb-0">Date Planner</h1>
     </div>
-  </nav>
+
+    <!-- Right-aligned links -->
+    <div>
+      <a href="{% url 'schedule_list' %}" class="btn btn-custom">Home</a>
+      <a href="{% url 'add_schedule' %}" class="btn btn-custom">Add Schedule</a>
+      <a href="{% url 'calendar' %}" class="btn btn-custom">Calendar</a>
+    </div>
+  </div>
+</nav>
+
 
   <div class="container">
     {% block content %}{% endblock %}
@@ -37,4 +102,3 @@
   {% block extra_js %}{% endblock %}
 </body>
 </html>
-
